@@ -2,9 +2,18 @@ from .transform import RandomErasing
 from .collate_batch import train_collate_fn
 from .collate_batch import val_collate_fn
 from .triplet_sampler import RandomIdentitySampler
-from .data import ImageDataset, init_dataset
+from .data import ImageDataset
 import torchvision.transforms as T
 from torch.utils.data.dataloader import DataLoader
+from .vehicleid import VehicleID
+from .veri import VeRi
+
+
+
+__imgreid_factory = {
+    'veri': VeRi,
+    'vehicleID': VehicleID,
+}
 
 def get_trm(cfg, is_train=True):
     normalize_transform = T.Normalize(mean=cfg.INPUT.PIXEL_MEAN, std=cfg.INPUT.PIXEL_STD)
@@ -33,7 +42,9 @@ def make_dataloader(cfg, num_gpus=1):
     val_trm = get_trm(cfg, is_train=False)
 
     num_workers = cfg.DATALOADER.NUM_WORKERS * num_gpus
-    dataset = init_dataset(cfg)
+    dataset = init_dataset(cfg.DATASETS.NAMES, root = cfg.DATASETS.DATA_PATH,
+                                               verbose = True,
+                                               test_size = cfg.DATASETS.TEST_SIZE)
 
     num_classes = dataset.num_train_pids
     train_set = ImageDataset(dataset.train, cfg, train_trm)
@@ -60,3 +71,21 @@ def make_dataloader(cfg, num_gpus=1):
     )
     return train_loader, val_loader, len(dataset.query), num_classes
 
+
+def init_dataset(name, **kwargs):
+    """
+        Use path in cfg to init a dataset
+        the dataset should be the following format
+        - Each Image should be named in 
+                (pid)_c(camid)_(iid).jpg
+            where pid is the person id, 
+                  camid is camera id,
+                  iid is image id(unique to every image)
+        - train set and val set should be organzed as
+            cfg.DATASETS.TRAIN_PATH: all the training images
+            cfg.DATASETS.QUERY_PATH: all the query images
+            cfg.DATASETS.GALLERY_PATH: all the gallery images
+    """
+    if name not in list(__imgreid_factory.keys()):
+        raise KeyError('Invalid dataset, got "{}", but expected to be one of {}'.format(name, list(__imgreid_factory.keys())))
+    return __imgreid_factory[name](**kwargs)

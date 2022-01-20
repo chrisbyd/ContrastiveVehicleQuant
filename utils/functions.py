@@ -18,29 +18,6 @@ def intra_norm(feature, len_code, n_book):
 
 
 
-def soft_assignment(z_, x_, n_book, alpha, device):
-    x = torch.split(x_, n_book, 1)
-    y = torch.split(z_, n_book, 1)
-    for i in range(n_book):
-        size_x = x[i].shape[0]
-        size_y = y[i].shape[0]
-        xx = torch.unsqueeze(x[i], 2)
-        xx = xx.repeat([1, 1, size_y])
-
-        yy = torch.unsqueeze(y[i], 2)
-        yy = yy.repeat([1, 1, size_x])
-        yy = yy.permute([2, 1, 0])
-        diff = 1 - torch.sum(torch.mul(xx, yy), 1)
-        softmax_diff = torch.softmax(diff*(-alpha), 1)
-        if i == 0:
-            soft_des_tmp = torch.matmul(softmax_diff, y[i])
-            descriptor = soft_des_tmp
-        else:
-            soft_des_tmp = torch.matmul(softmax_diff, y[i])
-            descriptor = torch.cat([descriptor, soft_des_tmp], 1)
-    return descriptor
-
-
 def my_soft_assignment(z_, x_, len_code, alpha, device):
     x = torch.split(x_, len_code, 1)
     y = torch.split(z_, len_code, 1)

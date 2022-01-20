@@ -18,7 +18,7 @@ def setup_logger(name, save_dir, distributed_rank, train=True):
     logger.addHandler(ch)
 
     if save_dir:
-        fh = logging.FileHandler(os.path.join(save_dir, "log.txt" if train else 'log_eval.txt'),
+        fh = logging.FileHandler(os.path.join(save_dir, "{}.txt".format(name) if train else 'log_eval.txt'),
                                 mode='w')
         fh.setLevel(logging.DEBUG)
         fh.setFormatter(formatter)

@@ -102,10 +102,10 @@ class TripletLoss(object):
         else:
             self.ranking_loss = nn.SoftMarginLoss()
 
-    def __call__(self, global_feat, labels, normalize_feature=False):
+    def __call__(self, global_feat, descriptor ,labels, normalize_feature=False):
         if normalize_feature:
             global_feat = normalize(global_feat, axis=-1)
-        dist_mat = euclidean_dist(global_feat, global_feat)
+        dist_mat = euclidean_dist(global_feat, descriptor)
         dist_ap, dist_an = hard_example_mining(
             dist_mat, labels)
         y = dist_an.new().resize_as_(dist_an).fill_(1)

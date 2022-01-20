@@ -1,15 +1,14 @@
 # encoding: utf-8
 
 import numpy as np
-from .eval_cylib.eval_metrics_cy import evaluate_cy
 
 
-def eval_func(distmat, q_pids, g_pids, q_camids, g_camids, max_rank=50, use_cython=False):
+
+def eval_func(distmat, q_pids, g_pids, q_camids, g_camids, max_rank=50, dataset_name = 'veri'):
     """Evaluation with market1501 metric
         Key: for each query identity, its gallery images from the same camera view are discarded.
         """
-    if use_cython:
-        return evaluate_cy(distmat, q_pids, g_pids, q_camids, g_camids, max_rank)
+ 
     num_q, num_g = distmat.shape
     if num_g < max_rank:
         max_rank = num_g
@@ -27,9 +26,13 @@ def eval_func(distmat, q_pids, g_pids, q_camids, g_camids, max_rank=50, use_cyth
         q_camid = q_camids[q_idx]
 
         # remove gallery samples that have the same pid and camid with query
-        order = indices[q_idx]
-        remove = (g_pids[order] == q_pid) & (g_camids[order] == q_camid)
-        keep = np.invert(remove)
+        if dataset_name == 'veri':
+            order = indices[q_idx]
+            remove = (g_pids[order] == q_pid) & (g_camids[order] == q_camid)
+            keep = np.invert(remove)
+        elif dataset_name == 'vehicleID':
+            remove = False  # without camid imformation remove no images in gallery
+            keep = np.invert(remove)
 
         # compute cmc curve
         # binary vector, positions with value 1 are correct matches

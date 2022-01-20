@@ -11,7 +11,7 @@ torch.multiprocessing.set_sharing_strategy('file_system')
 import torch.nn as nn
 import torchvision as tv
 import numpy as np
-
+import math
 # Use visdom for moniting the training process
 import visdom
 from utils import Visualizer
@@ -37,7 +37,9 @@ from optim import make_optimizer, WarmupMultiStepLR
 from evaluate import eval_func, euclidean_dist, re_rank
 from utils.functions import norm_gallery
 from tqdm import tqdm
+from utils.functions import norm_gallery
 import shutil
+import os.path as osp
 
 def parse_args():
     parser = argparse.ArgumentParser(description="ReID training")
@@ -49,6 +51,7 @@ def parse_args():
     parser.add_argument('opts', help='overwriting the training config' 
                         'from commandline', default=None,
                         nargs=argparse.REMAINDER)
+
     args = parser.parse_args()
     return args
 
@@ -61,18 +64,23 @@ def main():
 
 def train(args):
     if args.config_file != "":
+        print("The config file is", args.config_file)
         cfg.merge_from_file(args.config_file)
     cfg.merge_from_list(args.opts)
+
     cfg.freeze()
 
     output_dir = cfg.OUTPUT_DIR
+    output_dir = osp.join(output_dir, cfg.EXP_NAME)
     if output_dir and not os.path.exists(output_dir):
         os.makedirs(output_dir)
     shutil.copy(args.config_file, cfg.OUTPUT_DIR)
 
     num_gpus = torch.cuda.device_count()
+    hash_bit = str(int(cfg.QUANT.n_book)*int(math.log(int(cfg.QUANT.intn_word), 2)))
+    log_name = cfg.DATASETS.NAMES + '_' + hash_bit
 
-    logger = setup_logger('reid_baseline', output_dir, 0)
+    logger = setup_logger(log_name, output_dir, 0)
     logger.info('Using {} GPUS'.format(num_gpus))
     logger.info(args)
     logger.info('Running with config:\n{}'.format(cfg))
@@ -88,8 +96,10 @@ def train(args):
 
     for epoch in range(trainer.epochs):
         for batch in trainer.train_dl:
+           
             trainer.step(batch)
             trainer.handle_new_batch()
+
         trainer.handle_new_epoch()
 
 def test(args):
@@ -97,8 +107,12 @@ def test(args):
         cfg.merge_from_file(args.config_file)
     cfg.merge_from_list(args.opts)
     cfg.freeze()
-
-    logger = setup_logger('reid_baseline.eval', cfg.OUTPUT_DIR, 0, train=False)
+    output_dir = cfg.OUTPUT_DIR
+    output_dir = osp.join(output_dir, cfg.EXP_NAME)
+    if output_dir and not os.path.exists(output_dir):
+        os.makedirs(output_dir)
+    log_name = cfg.DATASETS.SOURCE_NAMES + '_' + cfg.DATASETS.NAMES
+    logger = setup_logger('log_name', cfg.OUTPUT_DIR, 0, train=False)
 
     logger.info('Running with config:\n{}'.format(cfg))
     
@@ -109,23 +123,37 @@ def test(args):
         model = nn.DataParallel(model)
         model = convert_model(model)
         logger.info('Use multi gpu to inference')
-    para_dict = torch.load(cfg.TEST.WEIGHT)
-    model.load_state_dict(para_dict)
+    weight_dir = osp.join('./outputs', cfg.EXP_NAME, 'checkpoint')
+    hash_bit = str(int(cfg.QUANT.n_book)*int(math.log(int(cfg.QUANT.intn_word), 2)))
+    weight_name = cfg.DATASETS.SOURCE_NAMES + '_' + str(cfg.TEST.MAP) + '_' +hash_bit + '.pth'
+    weight_path = osp.join(weight_dir, weight_name)
+  
+    para_dict = torch.load(weight_path)
+    model_dict = model.state_dict()
+    
+    pretrained_dict = {k:v for k,v in para_dict.items() if not k.startswith('classifier') }
+    model_dict.update(pretrained_dict)
+    model.load_state_dict(model_dict)
+ 
+
+
     model.cuda()
     model.eval()
 
-    feats, pids, camids, paths = [], [], [], []
+    feats, pids, camids, paths, descriptors = [], [], [], [], []
     with torch.no_grad():
         for batch in tqdm(val_dl, total=len(val_dl),
                          leave=False):
             data, pid, camid, path = batch
             paths.extend(list(path))
             data = data.cuda()
-            feat = model(data).detach().cpu()
+            feat, descriptor = model(data)[0].detach().cpu(), model(data)[1].detach().cpu()
             feats.append(feat)
+            descriptors.append(descriptor)
             pids.append(pid)
             camids.append(camid)
     feats = torch.cat(feats, dim=0)
+    descriptors = torch.cat(descriptors, dim=0)
     pids = torch.cat(pids, dim=0)
     camids = torch.cat(camids, dim=0)
 
@@ -134,16 +162,17 @@ def test(args):
     query_camid = camids[:num_query]
     query_path = np.array(paths[:num_query])
 
-    gallery_feat = feats[num_query:]
+    gallery_feat = descriptors[num_query:]
     gallery_pid = pids[num_query:]
     gallery_camid = camids[num_query:]
     gallery_path = np.array(paths[num_query:])
+
     
     distmat = euclidean_dist(query_feat, gallery_feat)
 
     cmc, mAP, all_AP = eval_func(distmat.numpy(), query_pid.numpy(), gallery_pid.numpy(), 
                          query_camid.numpy(), gallery_camid.numpy(),
-                         use_cython=True)
+                          dataset_name = cfg.DATASETS.NAMES)
     
     if cfg.TEST.VIS:
         worst_q = np.argsort(all_AP)[:cfg.TEST.VIS_Q_NUM]
@@ -174,7 +203,7 @@ def test(args):
     distmat = re_rank(query_feat, gallery_feat)
     cmc, mAP, all_AP = eval_func(distmat, query_pid.numpy(), gallery_pid.numpy(),
                          query_camid.numpy(), gallery_camid.numpy(),
-                         use_cython=True)
+                          dataset_name = cfg.DATASETS.NAMES)
 
     logger.info('ReRanking Result:')
     for r in cfg.TEST.CMC:
@@ -184,6 +213,8 @@ def test(args):
 
 
 if __name__ == '__main__':
+    # from torchvision import models
+    # resnet50 = models.resnet50(pretrained=True)
     main()
 
 

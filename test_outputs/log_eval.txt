@@ -1,0 +1,88 @@
+2021-12-03 15:24:12,739 log_name INFO: Running with config:
+DATALOADER:
+  NUM_INSTANCE: 6
+  NUM_WORKERS: 8
+  SAMPLER: softmax_triplet
+DATASETS:
+  DATA_PATH: ./data
+  GALLERY_PATH: bounding_box_test
+  NAMES: veri
+  QUERY_PATH: query
+  SOURCE_NAMES: vehicleID
+  TEST_SIZE: 800
+  TRAIN_PATH: bounding_box_train
+EXP_NAME: full_model
+INPUT:
+  PADDING: 0
+  PIXEL_MEAN: [0.5, 0.5, 0.5]
+  PIXEL_STD: [0.5, 0.5, 0.5]
+  PROB: 0.5
+  RE_PROB: 0.5
+  SIZE_TEST: [128, 256]
+  SIZE_TRAIN: [128, 256]
+MODEL:
+  DEVICE: cuda
+  LABEL_SMOOTH: False
+  LAST_STRIDE: 1
+  NAME: resnet50
+  PRETRAIN_PATH: /home/chris/.torch/models/resnet50-0676ba61.pth
+OUTPUT_DIR: ./test_outputs
+QUANT:
+  alpha: 20.0
+  intn_word: 256
+  len_code: 16
+  n_book: 128
+SOLVER:
+  BASE_LR: 0.0001
+  BIAS_LR_FACTOR: 1
+  CHECKPOINT_PERIOD: 20
+  CYTHON: True
+  EVAL_PERIOD: 20
+  FP16: True
+  GAMMA: 0.6
+  IMS_PER_BATCH: 96
+  LOG_PERIOD: 100
+  MARGIN: 0.3
+  MAX_EPOCHS: 140
+  MOMENTUM: 0.9
+  OPTIMIZER_NAME: Adam
+  STEPS: (20, 30, 45, 60, 75, 90, 105, 120, 135, 150, 165, 180, 195, 210, 225, 240, 255)
+  WARMUP_FACTOR: 0.01
+  WARMUP_ITERS: 10
+  WARMUP_METHOD: linear
+  WEIGHT_DECAY: 0.0005
+  WEIGHT_DECAY_BIAS: 0.0005
+TEST:
+  CMC: [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20]
+  DEBUG: True
+  IMS_PER_BATCH: 96
+  MAP: 0.846
+  MULTI_GPU: False
+  RERANK: True
+  VIS: False
+  VIS_G_NUM: 5
+  VIS_Q_NUM: 10
+  WEIGHT: 
+2021-12-03 15:25:25,055 log_name INFO: Validation Result:
+2021-12-03 15:25:25,055 log_name INFO: CMC Rank-1: 57.99%
+2021-12-03 15:25:25,055 log_name INFO: CMC Rank-2: 64.60%
+2021-12-03 15:25:25,055 log_name INFO: CMC Rank-3: 68.47%
+2021-12-03 15:25:25,056 log_name INFO: CMC Rank-4: 70.92%
+2021-12-03 15:25:25,056 log_name INFO: CMC Rank-5: 72.94%
+2021-12-03 15:25:25,056 log_name INFO: CMC Rank-6: 74.31%
+2021-12-03 15:25:25,056 log_name INFO: CMC Rank-7: 75.74%
+2021-12-03 15:25:25,056 log_name INFO: CMC Rank-8: 77.00%
+2021-12-03 15:25:25,056 log_name INFO: CMC Rank-9: 78.07%
+2021-12-03 15:25:25,056 log_name INFO: CMC Rank-10: 78.90%
+2021-12-03 15:25:25,056 log_name INFO: CMC Rank-11: 79.74%
+2021-12-03 15:25:25,056 log_name INFO: CMC Rank-12: 80.21%
+2021-12-03 15:25:25,056 log_name INFO: CMC Rank-13: 80.69%
+2021-12-03 15:25:25,056 log_name INFO: CMC Rank-14: 81.29%
+2021-12-03 15:25:25,056 log_name INFO: CMC Rank-15: 81.94%
+2021-12-03 15:25:25,056 log_name INFO: CMC Rank-16: 82.48%
+2021-12-03 15:25:25,056 log_name INFO: CMC Rank-17: 82.96%
+2021-12-03 15:25:25,056 log_name INFO: CMC Rank-18: 83.19%
+2021-12-03 15:25:25,056 log_name INFO: CMC Rank-19: 83.49%
+2021-12-03 15:25:25,056 log_name INFO: CMC Rank-20: 83.73%
+2021-12-03 15:25:25,056 log_name INFO: mAP: 21.51%
+2021-12-03 15:25:25,057 log_name INFO: --------------------

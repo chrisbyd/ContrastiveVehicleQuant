@@ -45,7 +45,7 @@ SOLVER:
 QUANT:
   intn_word: 256
   len_code: 16
-  n_book: 256
+  n_book: 128
   alpha: 20.0
   
 
@@ -56,6 +56,6 @@ TEST:
   WEIGHT: "path"
 
 OUTPUT_DIR: "./outputs"
-EXP_NAME: "full_model"
+EXP_NAME: "symmetric"
 
 

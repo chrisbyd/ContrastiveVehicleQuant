@@ -47,6 +47,7 @@ _C.INPUT.PADDING = 10
 _C.DATASETS = CN()
 # List of the dataset names for training, as present in paths_catalog.py
 _C.DATASETS.NAMES = ('market1501')
+_C.DATASETS.SOURCE_NAMES = ('market1501')
 # Root PATH to the dataset
 _C.DATASETS.DATA_PATH = '/home/zbc/data/market1501/'
 # PATH to train set
@@ -55,6 +56,7 @@ _C.DATASETS.TRAIN_PATH = 'bounding_box_train'
 _C.DATASETS.QUERY_PATH = 'query'
 # PATH to gallery set
 _C.DATASETS.GALLERY_PATH = 'bounding_box_test'
+_C.DATASETS.TEST_SIZE = 800
 
 # -----------------------------------------------------------------------------
 # DataLoader
@@ -110,16 +112,25 @@ _C.TEST.IMS_PER_BATCH = 128
 _C.TEST.WEIGHT = ""
 _C.TEST.DEBUG = False
 _C.TEST.MULTI_GPU = False
-_C.TEST.CMC = [1,5,10]
+_C.TEST.CMC = [1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20]
 _C.TEST.VIS = False
 _C.TEST.VIS_Q_NUM = 10
 _C.TEST.VIS_G_NUM = 5
 _C.TEST.RERANK = True
+_C.TEST.MAP = 0.0
+
+
+# Quantization parameter
+_C.QUANT = CN()
+_C.QUANT.intn_word = 16
+_C.QUANT.len_code = 32
+_C.QUANT.n_book = 16
+_C.QUANT.alpha = 20.0
 
 # ---------------------------------------------------------------------------- #
 # Misc options
 # ---------------------------------------------------------------------------- #
 _C.OUTPUT_DIR = ""
-
+_C.EXP_NAME = ""
 # Alias for easy usage
 cfg = _C

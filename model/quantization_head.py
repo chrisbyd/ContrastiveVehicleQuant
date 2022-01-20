@@ -1,12 +1,14 @@
 
-
+import torch.nn as nn
+import torch
+ 
 class GPQSoftMaxNet(nn.Module):
     def __init__(self, training, intn_word=16, len_code=12, n_book=12):
         super(GPQSoftMaxNet, self).__init__()
         self.word = intn_word
         self.len_code = len_code
         self.n_book = n_book
-        self.n_classes = n_classes
+       
         self.training = training
         print("len_code is {}, and n book is {}".format(len_code,n_book))
         self.Z = torch.rand((intn_word, len_code*n_book), requires_grad=True, device = 'cuda')

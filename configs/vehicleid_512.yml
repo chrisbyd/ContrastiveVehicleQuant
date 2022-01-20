@@ -12,7 +12,7 @@ INPUT:
   PADDING: 0
 
 DATASETS:
-  NAMES: 'veri'
+  NAMES: 'vehicleID'
   DATA_PATH: './data'
   TEST_SIZE: 800
 
@@ -23,7 +23,7 @@ DATALOADER:
 
 SOLVER:
   OPTIMIZER_NAME: 'Adam'
-  MAX_EPOCHS: 200
+  MAX_EPOCHS: 100
   BASE_LR: 0.0001
   BIAS_LR_FACTOR: 1
   WEIGHT_DECAY: 0.0005
@@ -40,12 +40,12 @@ SOLVER:
 
   CHECKPOINT_PERIOD: 20
   LOG_PERIOD: 100
-  EVAL_PERIOD: 20
+  EVAL_PERIOD: 5
 
 QUANT:
   intn_word: 256
   len_code: 16
-  n_book: 256
+  n_book: 64
   alpha: 20.0
   
 
@@ -56,6 +56,6 @@ TEST:
   WEIGHT: "path"
 
 OUTPUT_DIR: "./outputs"
-EXP_NAME: "full_model"
+EXP_NAME: "wo_class"
 
 

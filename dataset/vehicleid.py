@@ -30,7 +30,7 @@ class VehicleID(BaseImageDataset):
     """
     dataset_dir = 'VehicleID'
 
-    def __init__(self, root='datasets', verbose=True, test_size=800, **kwargs):
+    def __init__(self, root='./data', verbose=True, test_size=800, **kwargs):
         super(VehicleID, self).__init__(root)
         self.dataset_dir = osp.join(self.root, self.dataset_dir)
         self.img_dir = osp.join(self.dataset_dir, 'image')
@@ -45,7 +45,7 @@ class VehicleID(BaseImageDataset):
         elif self.test_size == 2400:
             self.test_list = osp.join(self.split_dir, 'test_list_2400.txt')
 
-        print(self.test_list)
+       
 
         self.check_before_run()
 
@@ -90,7 +90,7 @@ class VehicleID(BaseImageDataset):
             if pid2label is not None:
                 pid = pid2label[pid]
             camid = 1  # don't have camid information use 1 for all
-            img_path = osp.join(self.img_dir, name+'.jpg')
+            img_path = osp.join(self.img_dir, name + '.jpg')
             output.append((img_path, pid, camid))
         return output
 
@@ -118,6 +118,7 @@ class VehicleID(BaseImageDataset):
             test_data = f_test.readlines()
             for data in test_data:
                 name, pid = data.split(' ')
+                pid = int(pid)
                 test_pid_dict[pid].append([name, pid])
         test_pids = list(test_pid_dict.keys())
         num_test_pids = len(test_pids)
@@ -147,8 +148,8 @@ class VehicleID(BaseImageDataset):
             train_pid2label = self.get_pid2label(train_pids)
         else:
             train_pid2label = None
-        for key, value in train_pid2label.items():
-            print('{key}:{value}'.format(key=key, value=value))
+        # for key, value in train_pid2label.items():
+        #     print('{key}:{value}'.format(key=key, value=value))
 
         train = self.parse_img_pids(train_data, train_pid2label)
         query = self.parse_img_pids(query_data)

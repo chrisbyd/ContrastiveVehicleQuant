@@ -1,0 +1,1 @@
+CUDA_VISIBLE_DEVICES=1 python main.py --test -c configs/test.yml

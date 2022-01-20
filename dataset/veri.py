@@ -3,7 +3,7 @@ import re
 
 import os.path as osp
 
-from .bases import BaseImageDataset
+from .base import BaseImageDataset
 
 
 class VeRi(BaseImageDataset):
@@ -18,10 +18,10 @@ class VeRi(BaseImageDataset):
        # cameras: 20
        """
 
-    dataset_dir = 'veri'
+    dataset_dir = 'VeRi'
 
-    def __init__(self, root='../', verbose=True, **kwargs):
-        super(VeRi, self).__init__()
+    def __init__(self, root='./data', verbose=True, test_size = 0):
+        super(VeRi, self).__init__(root = root)
         self.dataset_dir = osp.join(root, self.dataset_dir)
         self.train_dir = osp.join(self.dataset_dir, 'image_train')
         self.query_dir = osp.join(self.dataset_dir, 'image_query')

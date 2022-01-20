@@ -1,9 +1,10 @@
 MODEL:
-  PRETRAIN_PATH: '~/.torch/models/resnet50-19c8e357.pth'
+  PRETRAIN_PATH: '/home/chris/.torch/models/resnet50-0676ba61.pth'
+  
   
 INPUT:
-  SIZE_TRAIN: [384, 384]
-  SIZE_TEST: [384, 384]
+  SIZE_TRAIN: [128, 256]
+  SIZE_TEST: [128, 256]
   PIXEL_MEAN: [0.5, 0.5, 0.5]
   PIXEL_STD: [0.5, 0.5, 0.5]
   PROB: 0.5 # random horizontal flip
@@ -11,11 +12,9 @@ INPUT:
   PADDING: 0
 
 DATASETS:
-  NAMES: 'vehicleid'
-  DATA_PATH: './data/vehicleid'
-  TRAIN_PATH: 'image_train'
-  QUERY_PATH: 'image_query'
-  GALLERY_PATH: 'image_test'
+  NAMES: 'vehicleID'
+  DATA_PATH: './data'
+  TEST_SIZE: 800
 
 DATALOADER:
   SAMPLER: 'softmax_triplet'
@@ -24,12 +23,12 @@ DATALOADER:
 
 SOLVER:
   OPTIMIZER_NAME: 'Adam'
-  MAX_EPOCHS: 260
+  MAX_EPOCHS: 100
   BASE_LR: 0.0001
   BIAS_LR_FACTOR: 1
   WEIGHT_DECAY: 0.0005
   WEIGHT_DECAY_BIAS: 0.0005
-  IMS_PER_BATCH: 36
+  IMS_PER_BATCH: 96
   FP16: True
 
   STEPS: [20, 30, 45, 60, 75, 90, 105, 120, 135, 150, 165, 180, 195, 210, 225, 240, 255]
@@ -39,15 +38,24 @@ SOLVER:
   WARMUP_ITERS: 10
   WARMUP_METHOD: 'linear'
 
-  CHECKPOINT_PERIOD: 5
+  CHECKPOINT_PERIOD: 20
   LOG_PERIOD: 100
   EVAL_PERIOD: 5
 
+QUANT:
+  intn_word: 256
+  len_code: 16
+  n_book: 128
+  alpha: 20.0
+  
+
+
 TEST:
-  IMS_PER_BATCH: 16
+  IMS_PER_BATCH: 96
   DEBUG: True
   WEIGHT: "path"
 
-OUTPUT_DIR: "./outputs/veri"
+OUTPUT_DIR: "./outputs"
+EXP_NAME: "wo_class"
 
 
