@@ -31,10 +31,11 @@ class SupConLoss(nn.Module):
 
   
         batch_size = features.shape[0]
+        labels = torch.unsqueeze(labels, dim=1)
        
-   
      #   mask = (torch.matmul(labels,m_labels.T) > 0).float().to(device)
         mask = torch.eq(labels, labels.T).float().to(device)
+    
           
             
       
@@ -58,7 +59,7 @@ class SupConLoss(nn.Module):
 
         # tile mask
       #  mask = mask.repeat(anchor_count, contrast_count)
-        # mask-out self-contrast cases
+        # mask-out self-contrast cases k,mo
         logits_mask = torch.scatter(
             torch.ones_like(mask),
             1,
@@ -75,6 +76,7 @@ class SupConLoss(nn.Module):
         else:
             exp_logits = torch.exp(logits) 
         log_prob = logits - torch.log(exp_logits.sum(1, keepdim=True))
+       
 
         # compute mean of log-likelihood over positive
         mean_log_prob_pos = (mask * log_prob).sum(1) / mask.sum(1)
@@ -82,5 +84,10 @@ class SupConLoss(nn.Module):
         # loss
         loss = - (self.temperature / self.base_temperature) * mean_log_prob_pos
         loss = loss.view(anchor_count, batch_size).mean()
+        # print("The anchor feature is", anchor_feature)
+        # print("The anchor feature size is", anchor_feature.size())
+        # print("The constrative loss", loss.item())
+        # print("The anchor dot contrast", anchor_dot_contrast)
+      
 
         return loss

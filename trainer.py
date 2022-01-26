@@ -137,8 +137,12 @@ class BaseTrainer(object):
         img, target = batch
         img, target = img.cuda(), target.cuda()
         score, feat, descriptor = self.model(img)
+        fnorm = torch.norm(feat, p=2, dim=1, keepdim=True)
+        feat = feat.div(fnorm.expand_as(feat))
+        fnorm = torch.norm(descriptor, p=2, dim=1, keepdim=True)
+        descriptor = descriptor.div(fnorm.expand_as(descriptor))
        # print(descriptor)
-        loss = self.loss_func(score, descriptor ,descriptor, target)
+        loss = self.loss_func(score, feat ,descriptor, target)
         if self.mix_precision:
             with amp.scale_loss(loss, self.optim) as scaled_loss:
                 scaled_loss.backward()
